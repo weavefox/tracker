@@ -148,6 +148,26 @@ export function getBrowserInfo(): { name: string; version: string } {
 }
 
 /**
+ * 检测是否为机器人/爬虫访问
+ * 通过 UA 关键词 + navigator.webdriver 检测
+ */
+export function isBot(): boolean {
+  const ua = navigator.userAgent;
+
+  // UA 关键词匹配：已知爬虫、自动化工具、HTTP 客户端
+  if (/bot|crawl|spider|slurp|headless|phantom|selenium|puppeteer|playwright|python-requests|curl|wget|httpclient/i.test(ua)) {
+    return true;
+  }
+
+  // Selenium / Puppeteer 等自动化工具会设置此属性为 true
+  if (navigator.webdriver === true) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * 获取操作系统
  */
 export function getOS(): string {

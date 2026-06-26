@@ -15,6 +15,7 @@
  */
 
 import { Tracer, TrackerConfig } from './tracker';
+import { isBot as checkIsBot } from './fingerprint';
 
 // 全局单例
 let trackerInstance: Tracer | null = null;
@@ -101,6 +102,13 @@ export function getQueueSize(): number {
  */
 export function getTracker(): Tracer | null {
   return trackerInstance;
+}
+
+/**
+ * Check if current visitor is a bot/crawler
+ */
+export function isBot(): boolean {
+  return checkIsBot();
 }
 
 // Export types
