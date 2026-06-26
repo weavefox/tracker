@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracker SDK — 轻量级 Web 埋点方案</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #12121a;
+      --text: #e8e8ed;
+      --text-dim: #6b6b7a;
+      --accent: #00ff88;
+      --accent-dim: #00ff8833;
+      --border: #2a2a3a;
+      --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 4rem;
+      padding-top: 2rem;
+    }
+
+    .logo {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo::before {
+      content: '>';
+      color: var(--text-dim);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    /* Features Grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 800px) {
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .feature {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: default;
+    }
+
+    .feature:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .feature-desc {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .code-block .keyword { color: #ff79c6; }
+    .code-block .string { color: #f1fa8c; }
+    .code-block .comment { color: var(--text-dim); }
+    .code-block .func { color: #8be9fd; }
+
+    /* Live Demo */
+    .demo {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .demo-title {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .demo-title::before {
+      content: '●';
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .demo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .btn.primary {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Event Log */
+    .event-log {
+      background: #08080c;
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.75rem;
+      animation: slideIn 0.2s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-time {
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .log-event {
+      color: var(--accent);
+    }
+
+    .log-data {
+      color: #bd93f9;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-right: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      .container { padding: 1.5rem 1rem; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">WFTK</div>
+      <h1>Tracker SDK</h1>
+      <p class="subtitle">轻量级 Web 埋点方案 · 极简接入 · 实时采集</p>
+    </header>
+
+    <section>
+      <h2>特性</h2>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">🔱</div>
+          <div class="feature-title">设备指纹</div>
+          <div class="feature-desc">Canvas 指纹识别，无需 Cookie</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🚀</div>
+          <div class="feature-title">Beacon API</div>
+          <div class="feature-desc">非阻塞发送，页面关闭后仍可发送</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📦</div>
+          <div class="feature-title">离线队列</div>
+          <div class="feature-desc">本地存储重试，网络恢复自动上传</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">全自动采集</div>
+          <div class="feature-desc">Pageview、点击、错误自动追踪</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>接入</h2>
+      <pre class="code-block">
+<span class="comment">// CDN 引入</span>
+&lt;script src=<span class="string">"tracker.umd.js"</span>&gt;&lt;/script&gt;
+&lt;script&gt;
+  <span class="func">WFTK</span>.<span class="func">init</span>({
+    <span class="keyword">endpoint</span>: <span class="string">'/api/v1/collect'</span>,
+    <span class="keyword">debug</span>: <span class="keyword">true</span>
+  });
+&lt;/script&gt;
+      </pre>
+    </section>
+
+    <section>
+      <h2>实时演示</h2>
+      <div class="demo">
+        <div class="demo-title">点击按钮触发事件</div>
+        <div class="demo-actions">
+          <button class="btn" data-event="click" data-action="cta_click">CTA Click</button>
+          <button class="btn" data-event="click" data-action="download_click">Download</button>
+          <button class="btn" data-event="click" data-action="share_click">Share</button>
+          <button class="btn primary" data-event="custom" data-action="demo_trigger">自定义事件</button>
+        </div>
+        <div class="event-log" id="eventLog">
+          <div class="log-entry">
+            <span class="log-time">--:--:--</span>
+            <span class="log-event">system</span>
+            <span class="log-data">点击按钮查看实时事件流...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>会话统计</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="eventCount">0</div>
+          <div class="stat-label">Events</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="sessionTime">00:00</div>
+          <div class="stat-label">Session Time</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="fpHash">----</div>
+          <div class="stat-label">Fingerprint</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>MIT License · Made for Hackathon</div>
+      <div class="footer-links">
+        <a href="https://github.com/weavefox/tracker" target="_blank">GitHub</a>
+        <a href="#" id="docsLink">文档</a>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module">
+    // ========== 拦截请求日志 ==========
+    const originalFetch = window.fetch;
+    const originalSendBeacon = navigator.sendBeacon.bind(navigator);
+
+    window.fetch = async function(...args) {
+      console.log('[fetch] ALL:', args[0]);
+      const url = args[0];
+      if (url.includes('collect')) {
+        if (body?.events) {
+          body.events.forEach(evt => {
+            window.dispatchEvent(new CustomEvent('wftk:event', {
+              detail: evt
+            }));
+          });
+        }
+      }
+      return originalFetch.apply(this, args);
+    };
+
+    navigator.sendBeacon = function(url, data) {
+      if (url.includes('collect')) {
+        // data 可能是 Blob 或 ArrayBuffer
+        const readBody = async () => {
+          try {
+            const text = data instanceof Blob
+              ? await data.text()
+              : new TextDecoder().decode(data);
+            const body = JSON.parse(text);
+            if (body?.events) {
+              body.events.forEach(evt => {
+                window.dispatchEvent(new CustomEvent('wftk:event', {
+                  detail: evt
+                }));
+              });
+            }
+          } catch (e) {}
+        };
+        readBody();
+      }
+      return originalSendBeacon(url, data);
+    };
+
+    import { init, track, getFingerprint } from '@weavefox/tracker';
+
+    const tracker = init({
+      endpoint: '/api/v1/collect/event',
+      appId: 'demo',
+      debug: true,
+      autoPageview: true,
+      enableQueue: false, // 禁用本地队列，方便演示
+    });
+
+    // 更新 UI
+    document.getElementById('fpHash').textContent = getFingerprint().slice(0, 8);
+
+    // 更新会话时间
+    const sessionStart = Date.now();
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const secs = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('sessionTime').textContent = `${mins}:${secs}`;
+    }, 1000);
+
+    // ========== 事件监听与展示 ==========
+
+    const eventLog = document.getElementById('eventLog');
+    const eventCountEl = document.getElementById('eventCount');
+    let eventCount = 0;
+
+    // 监听 Tracker 事件
+    window.addEventListener('wftk:event', (e) => {
+      console.log('[wftk:event] full event:', e.detail);
+      const event = e.detail;
+      eventCount++;
+      eventCountEl.textContent = eventCount;
+
+      // 添加日志
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <span class="log-time">${timeStr}</span>
+        <span class="log-event">${event.event}</span>
+        <span class="log-data">${event.data.action || `${event.data.browser?.name || ''} ${event.data.os || ''} ${event.data.deviceType || ''}`}</span>
+      `;
+
+      eventLog.insertBefore(entry, eventLog.firstChild);
+
+      // 限制显示数量
+      if (eventLog.children.length > 50) {
+        eventLog.removeChild(eventLog.lastChild);
+      }
+    });
+
+    // ========== 按钮交互 ==========
+
+    document.querySelectorAll('[data-event]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const eventType = e.target.dataset.event;
+        const action = e.target.dataset.action;
+
+        tracker.track(eventType, {
+          action,
+          target: e.target.tagName,
+          text: e.target.textContent
+        });
+      });
+    });
+
+    // ========== 模拟链接点击追踪 ==========
+
+    document.getElementById('docsLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      tracker.track('click', {
+        action: 'docs_click',
+        url: e.target.href
+      });
+      alert('📄 文档链接点击已追踪！\n实际项目中将跳转至文档页面。');
+    });
+
+    // 鼠标移动追踪（采样）
+    let moveCounter = 0;
+    document.addEventListener('mousemove', () => {
+      moveCounter++;
+      if (moveCounter % 50 === 0) { // 每 50 次采样一次
+        tracker.track('mousemove', {
+          action: 'cursor_move',
+          sample: true
+        });
+      }
+    });
+
+    // 滚动追踪（采样）
+    let lastScrollY = 0;
+    window.addEventListener('scroll', () => {
+      const now = Date.now();
+      // 节流：每 2 秒最多一次
+      if (now - lastScrollY > 2000) {
+        tracker.track('scroll', {
+          action: 'page_scroll',
+          depth: Math.round(window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100)
+        });
+        lastScrollY = now;
+      }
+    });
+
+    console.log('%c📡 WFTK Tracker initialized', 'color: #00ff88; font-size: 14px;');
+    console.log('%cTry: Tracker.track("custom", { action: "test" })', 'color: #6b6b7a;');
+  </script>
+</body>
+</html>
