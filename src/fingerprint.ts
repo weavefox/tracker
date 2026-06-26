@@ -168,18 +168,15 @@ export function isBot(): boolean {
 }
 
 /**
- * 获取操作系统
+ * 获取操作系统（仅返回平台，不含版本号）
  */
 export function getOS(): string {
   const ua = navigator.userAgent;
 
-  if (/windows nt 10/i.test(ua)) return 'Windows 10';
-  if (/windows nt 6.3/i.test(ua)) return 'Windows 8.1';
-  if (/windows nt 6.2/i.test(ua)) return 'Windows 8';
-  if (/windows nt 6.1/i.test(ua)) return 'Windows 7';
-  if (/mac os x (\d+)[._](\d+)/i.test(ua)) return 'macOS';
-  if (/android (\d+)/i.test(ua)) return `Android ${/android (\d+)/i.exec(ua)?.[1]}`;
-  if (/ios(\d+)/i.test(ua)) return `iOS`;
+  if (/windows nt/i.test(ua)) return 'Windows';
+  if (/mac os x/i.test(ua)) return 'macOS';
+  if (/android/i.test(ua)) return 'Android';
+  if (/ios/i.test(ua)) return 'iOS';
   if (/linux/i.test(ua)) return 'Linux';
 
   return 'Unknown';
