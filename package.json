@@ -20,6 +20,9 @@
   ],
   "author": "Weavefox",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^26.0.1",
     "typescript": "^5.3.0",
