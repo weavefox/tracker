@@ -103,5 +103,10 @@ export function getTracker(): Tracer | null {
   return trackerInstance;
 }
 
+/**
+ * Check if current visitor is a bot/crawler
+ */
+export { isBot } from './fingerprint';
+
 // Export types
 export type { TrackerConfig } from './tracker';

@@ -7,7 +7,8 @@ import {
   generateFingerprint,
   getDeviceType,
   getBrowserInfo,
-  getOS
+  getOS,
+  isBot
 } from './fingerprint';
 import {
   getTimestamp,
@@ -32,6 +33,7 @@ export interface TrackerConfig {
   sessionTimeout?: number;
   maxEventsPerSession?: number;
   enableQueue?: boolean;
+  enableBotFilter?: boolean;
 }
 
 // 事件类型
@@ -73,12 +75,14 @@ const DEFAULT_CONFIG: Partial<TrackerConfig> = {
   debug: false,
   sessionTimeout: 30 * 60 * 1000, // 30分钟
   maxEventsPerSession: 1000,
-  enableQueue: true
+  enableQueue: true,
+  enableBotFilter: true
 };
 
 export class Tracer {
   private config: TrackerConfig;
   private fingerprint: string;
+  private isBot: boolean;
   private session: Session;
   private userId?: string;
   private eventCount = 0;
@@ -88,6 +92,7 @@ export class Tracer {
   constructor(config: TrackerConfig) {
     this.config = deepMerge(DEFAULT_CONFIG, config);
     this.fingerprint = generateFingerprint();
+    this.isBot = isBot();
     this.session = this.initSession();
     this.initAutoTrack();
   }
@@ -250,6 +255,11 @@ export class Tracer {
    * 上报事件
    */
   private async report(eventType: EventType, data: Record<string, any> = {}): Promise<void> {
+    // 机器人过滤
+    if (this.config.enableBotFilter !== false && this.isBot) {
+      return;
+    }
+
     try {
       const event = this.buildEvent(eventType, data);
 
