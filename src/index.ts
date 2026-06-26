@@ -15,7 +15,6 @@
  */
 
 import { Tracer, TrackerConfig } from './tracker';
-import { isBot as checkIsBot } from './fingerprint';
 
 // 全局单例
 let trackerInstance: Tracer | null = null;
@@ -107,9 +106,7 @@ export function getTracker(): Tracer | null {
 /**
  * Check if current visitor is a bot/crawler
  */
-export function isBot(): boolean {
-  return checkIsBot();
-}
+export { isBot } from './fingerprint';
 
 // Export types
 export type { TrackerConfig } from './tracker';
