@@ -4,8 +4,8 @@ A lightweight web analytics SDK for tracking user visits and events.
 
 ## ✨ Features
 
+- **Vibe Coding Friendly** - Zero-config, AI-generated apps can add tracking with single line
 - **Device Fingerprinting** - Canvas-based fingerprint for visitor identification
-- **Beacon API** - Non-blocking data transmission
 - **Offline Queue** - Local storage retry for failed requests
 - **Auto Pageview** - Automatic page visit tracking
 - **Custom Events** - Track clicks, errors, and custom actions
