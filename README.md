@@ -1,5 +1,12 @@
 # Tracker SDK
 
+[![build](https://github.com/weavefox/tracker/actions/workflows/build.yml/badge.svg)](https://github.com/weavefox/tracker/actions/workflows/build.yml)
+[![npm](https://img.shields.io/npm/v/@weavefox/tracker)](https://www.npmjs.com/package/@weavefox/tracker)
+[![minzip](https://img.shields.io/bundlejs/size/@weavefox/tracker)](https://bundlejs.com/?bundle=&name=weavefox-tracker)
+[![license](https://img.shields.io/github/license/weavefox/tracker)](LICENSE)
+[![types](https://img.shields.io/npm/types/typescript.svg)](https://www.typescriptlang.org/)
+[![downloads](https://img.shields.io/npm/dm/@weavefox/tracker)](https://www.npmjs.com/package/@weavefox/tracker)
+
 A lightweight web analytics SDK for tracking user visits and events.
 
 ## ✨ Features
