@@ -1,6 +1,6 @@
 /**
  * 数据上报模块
- * 支持 Beacon API 和 fetch 上报，带本地缓存重试机制
+ * 支持 fetch 上报，带本地缓存重试机制
  */
 
 import { getTimestamp, generateNonce } from './utils';
@@ -8,7 +8,6 @@ import { getTimestamp, generateNonce } from './utils';
 export interface SendOptions {
   url: string;
   data: any;
-  useBeacon?: boolean;
 }
 
 export interface QueueItem {
@@ -32,27 +31,9 @@ const QUEUE_KEY = 'wf_send_queue';
  * 发送数据
  */
 export async function sendData(options: SendOptions): Promise<boolean> {
-  const { url, data, useBeacon = true } = options;
+  const { url, data } = options;
 
-  // 优先使用 Beacon API
-  if (useBeacon && typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
-    return sendByBeacon(url, data);
-  }
-
-  // Fallback 到 fetch
   return sendByFetch(url, data);
-}
-
-/**
- * 通过 Beacon API 发送
- */
-function sendByBeacon(url: string, data: any): boolean {
-  try {
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    return navigator.sendBeacon(url, blob);
-  } catch {
-    return false;
-  }
 }
 
 /**

@@ -312,14 +312,14 @@
       <h2>特性</h2>
       <div class="features">
         <div class="feature">
+          <div class="feature-icon">🤖</div>
+          <div class="feature-title">Vibe Coding</div>
+          <div class="feature-desc">AI 生成应用友好，一行代码接入</div>
+        </div>
+        <div class="feature">
           <div class="feature-icon">🔱</div>
           <div class="feature-title">设备指纹</div>
           <div class="feature-desc">Canvas 指纹识别，无需 Cookie</div>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">🚀</div>
-          <div class="feature-title">Beacon API</div>
-          <div class="feature-desc">非阻塞发送，页面关闭后仍可发送</div>
         </div>
         <div class="feature">
           <div class="feature-icon">📦</div>
@@ -398,44 +398,28 @@
   <script type="module">
     // ========== 拦截请求日志 ==========
     const originalFetch = window.fetch;
-    const originalSendBeacon = navigator.sendBeacon.bind(navigator);
 
     window.fetch = async function(...args) {
       console.log('[fetch] ALL:', args[0]);
       const url = args[0];
       if (url.includes('collect')) {
-        if (body?.events) {
-          body.events.forEach(evt => {
-            window.dispatchEvent(new CustomEvent('wftk:event', {
-              detail: evt
-            }));
-          });
-        }
-      }
-      return originalFetch.apply(this, args);
-    };
-
-    navigator.sendBeacon = function(url, data) {
-      if (url.includes('collect')) {
-        // data 可能是 Blob 或 ArrayBuffer
-        const readBody = async () => {
-          try {
-            const text = data instanceof Blob
-              ? await data.text()
-              : new TextDecoder().decode(data);
-            const body = JSON.parse(text);
-            if (body?.events) {
-              body.events.forEach(evt => {
+        // 解析请求体
+        try {
+          const body = args[1]?.body;
+          if (body) {
+            const text = typeof body === 'string' ? body : await body.text();
+            const parsed = JSON.parse(text);
+            if (parsed?.events) {
+              parsed.events.forEach(evt => {
                 window.dispatchEvent(new CustomEvent('wftk:event', {
                   detail: evt
                 }));
               });
             }
-          } catch (e) {}
-        };
-        readBody();
+          }
+        } catch (e) {}
       }
-      return originalSendBeacon(url, data);
+      return originalFetch.apply(this, args);
     };
 
     import { init, track, getFingerprint } from '@weavefox/tracker';
