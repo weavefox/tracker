@@ -22,9 +22,9 @@ export function getTimestamp(): number {
 }
 
 /**
- * 获取页面 Referrer
+ * 获取页面 Referer
  */
-export function getReferrer(): string {
+export function getReferer(): string {
   return document.referrer || '';
 }
 

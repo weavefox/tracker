@@ -13,7 +13,7 @@ import {
 import {
   getTimestamp,
   generateNonce,
-  getReferrer,
+  getReferer,
   getTitle,
   getPageUrl,
   getViewport,
@@ -230,7 +230,8 @@ export class Tracer {
       // 页面信息
       url: getPageUrl(),
       title: getTitle(),
-      referrer: getReferrer(),
+      referer: getReferer(),
+      referrer: getReferer(), // 冗余传输
 
       // 会话信息
       sessionId: this.session.id,
