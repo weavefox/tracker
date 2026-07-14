@@ -1,6 +1,6 @@
 {
   "name": "@weavefox/tracker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Website Analytics SDK - Lightweight, secure tracking with anti-bot protection",
   "main": "dist/tracer.umd.js",
   "module": "dist/tracer.mjs",

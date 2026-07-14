@@ -86,7 +86,7 @@ WFTK.init({
     "data": {
       "url": "https://example.com/page",
       "title": "Page Title",
-      "referrer": "https://google.com",
+      "referer": "https://google.com",
       "sessionId": "sess_xxx",
       "sessionStart": 1699999000000,
       "visitCount": 1,
@@ -112,13 +112,13 @@ Content-Type: application/json
 
 ### App Identification
 
-Primary method: use the `appId` from request body. Optional alternative: identify by request origin (Referrer/Host).
+Primary method: use the `appId` from request body. Optional alternative: identify by request origin (Referer/Host).
 
 ```javascript
 // Method 1: From request body (recommended)
 const appId = req.body.appId;
 
-// Method 2: By Referrer
+// Method 2: By Referer
 const domain = new URL(req.headers.referer || '').hostname;
 const appId = await getAppIdByDomain(domain);
 ```
