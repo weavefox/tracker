@@ -19,8 +19,7 @@ import {
   getViewport,
   deepMerge,
   getStorageKey,
-  isSameSession,
-  throttle
+  isSameSession
 } from './utils';
 import { sendData, sendQueue } from './sender';
 
@@ -36,22 +35,14 @@ export interface TrackerConfig {
   enableBotFilter?: boolean;
 }
 
-// 事件类型
-export type EventType =
-  | 'pageview'
-  | 'click'
-  | 'scroll'
-  | 'custom'
-  | 'js_error'
-  | 'performance';
-
 // 事件数据
 export interface TrackEvent {
-  event: EventType;
+  event: string;
   timestamp: number;
   nonce: string;
   fingerprint: string;
   data: Record<string, any>;
+  biz: Record<string, any>;
   userId?: string;
 }
 
@@ -87,7 +78,6 @@ export class Tracer {
   private userId?: string;
   private eventCount = 0;
   private isInitialized = false;
-  private boundClickSelectors = new Set<string>();
 
   constructor(config: TrackerConfig) {
     this.config = deepMerge(DEFAULT_CONFIG, config);
@@ -197,7 +187,7 @@ export class Tracer {
   /**
    * 构建事件数据
    */
-  private buildEvent(eventType: EventType, data: Record<string, any> = {}): TrackEvent {
+  private buildEvent(event: string, data: Record<string, any> = {}): TrackEvent {
     // 检查事件数量限制
     this.eventCount++;
     if (this.eventCount > (this.config.maxEventsPerSession || 1000)) {
@@ -206,14 +196,12 @@ export class Tracer {
     }
 
     const eventData: TrackEvent = {
-      event: eventType,
+      event,
       timestamp: getTimestamp(),
       nonce: generateNonce(),
       fingerprint: this.fingerprint,
-      data: {
-        ...this.getBaseData(),
-        ...data
-      },
+      data: this.getBaseData(),
+      biz: { ...data },
       userId: this.userId
     };
 
@@ -255,18 +243,18 @@ export class Tracer {
   /**
    * 上报事件
    */
-  private async report(eventType: EventType, data: Record<string, any> = {}): Promise<void> {
+  private async report(event: string, data: Record<string, any> = {}): Promise<void> {
     // 机器人过滤
     if (this.config.enableBotFilter !== false && this.isBot) {
       return;
     }
 
     try {
-      const event = this.buildEvent(eventType, data);
+      const eventData = this.buildEvent(event, data);
 
       const payload: Payload = {
         appId: this.config.appId,
-        events: [event]
+        events: [eventData]
       };
 
       // 发送到服务端
@@ -278,7 +266,7 @@ export class Tracer {
         await sendData({ url, data: payload });
       }
 
-      this.log('Event tracked', { event: eventType, data });
+      this.log('Event tracked', { event, data });
     } catch (error) {
       if (this.config.debug) {
         console.error('[WFTK] Track error:', error);
@@ -296,63 +284,8 @@ export class Tracer {
   /**
    * 追踪自定义事件
    */
-  track(eventName: string, data: Record<string, any> = {}): void {
-    this.report('custom', { eventName, ...data });
-  }
-
-  /**
-   * 追踪点击事件（自动绑定）
-   */
-  trackClick(selector: string, data: Record<string, any> = {}): void {
-    if (typeof document === 'undefined') return;
-
-    // 防止重复绑定相同 selector
-    if (this.boundClickSelectors.has(selector)) {
-      this.warn(`Click handler for "${selector}" already bound`);
-      return;
-    }
-    this.boundClickSelectors.add(selector);
-
-    const handler = throttle((e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const closest = target.closest(selector);
-
-      if (closest) {
-        this.report('click', {
-          element: selector,
-          tag: target.tagName.toLowerCase(),
-          text: target.textContent?.slice(0, 50),
-          ...data
-        });
-      }
-    }, 1000);
-
-    document.addEventListener('click', handler);
-  }
-
-  /**
-   * 追踪 JavaScript 错误
-   */
-  trackError(data: Record<string, any> = {}): void {
-    if (typeof window === 'undefined') return;
-
-    window.addEventListener('error', (event) => {
-      this.report('js_error', {
-        message: event.message,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno,
-        ...data
-      });
-    });
-
-    window.addEventListener('unhandledrejection', (event) => {
-      this.report('js_error', {
-        message: event.reason?.message || 'Unhandled Promise Rejection',
-        stack: event.reason?.stack,
-        ...data
-      });
-    });
+  track(event: string, data: Record<string, any> = {}): void {
+    this.report(event, data);
   }
 
   /**

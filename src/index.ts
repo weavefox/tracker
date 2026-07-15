@@ -36,8 +36,8 @@ export function init(config: TrackerConfig): Tracer {
 /**
  * Track a custom event
  */
-export function track(eventName: string, data?: Record<string, any>): void {
-  trackerInstance?.track(eventName, data);
+export function track(event: string, data?: Record<string, any>): void {
+  trackerInstance?.track(event, data);
 }
 
 /**
@@ -45,20 +45,6 @@ export function track(eventName: string, data?: Record<string, any>): void {
  */
 export function trackPageview(data?: Record<string, any>): void {
   trackerInstance?.trackPageview(data);
-}
-
-/**
- * Track clicks on element (auto-bind)
- */
-export function trackClick(selector: string, data?: Record<string, any>): void {
-  trackerInstance?.trackClick(selector, data);
-}
-
-/**
- * Track JavaScript errors
- */
-export function trackError(data?: Record<string, any>): void {
-  trackerInstance?.trackError(data);
 }
 
 /**
