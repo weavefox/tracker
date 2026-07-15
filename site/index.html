@@ -329,7 +329,7 @@
         <div class="feature">
           <div class="feature-icon">⚡</div>
           <div class="feature-title">全自动采集</div>
-          <div class="feature-desc">Pageview、点击、错误自动追踪</div>
+          <div class="feature-desc">Pageview 自动追踪，自定义事件随心埋点</div>
         </div>
       </div>
     </section>
@@ -466,7 +466,7 @@
       entry.innerHTML = `
         <span class="log-time">${timeStr}</span>
         <span class="log-event">${event.event}</span>
-        <span class="log-data">${event.data.action || `${event.data.browser?.name || ''} ${event.data.os || ''} ${event.data.deviceType || ''}`}</span>
+        <span class="log-data">${event.biz?.action || `${event.data.browser?.name || ''} ${event.data.os || ''} ${event.data.deviceType || ''}`}</span>
       `;
 
       eventLog.insertBefore(entry, eventLog.firstChild);

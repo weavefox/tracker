@@ -48,20 +48,6 @@ export function trackPageview(data?: Record<string, any>): void {
 }
 
 /**
- * Track clicks on element (auto-bind)
- */
-export function trackClick(selector: string, data?: Record<string, any>): void {
-  trackerInstance?.trackClick(selector, data);
-}
-
-/**
- * Track JavaScript errors
- */
-export function trackError(data?: Record<string, any>): void {
-  trackerInstance?.trackError(data);
-}
-
-/**
  * Set user ID after login
  */
 export function setUserId(userId: string): void {

@@ -15,7 +15,7 @@ A lightweight web analytics SDK for tracking user visits and events.
 - **Device Fingerprinting** - Canvas-based fingerprint for visitor identification
 - **Offline Queue** - Local storage retry for failed requests
 - **Auto Pageview** - Automatic page visit tracking
-- **Custom Events** - Track clicks, errors, and custom actions
+- **Custom Events** - Track any custom user actions via `track(eventName, data)`
 - **Session Tracking** - Automatic session management (30min timeout)
 
 ## 📦 Install
@@ -53,8 +53,6 @@ init({
 | `init(config)` | Initialize the tracker |
 | `track(eventName, data)` | Track a custom event |
 | `trackPageview(data)` | Track a page view |
-| `trackClick(selector, data)` | Auto-track clicks on element |
-| `trackError(data)` | Track JavaScript errors |
 | `setUserId(userId)` | Set user ID after login |
 | `getFingerprint()` | Get device fingerprint |
 | `flush()` | Force send queued events |
@@ -87,6 +85,7 @@ WFTK.init({
       "url": "https://example.com/page",
       "title": "Page Title",
       "referer": "https://google.com",
+      "referrer": "https://google.com",
       "sessionId": "sess_xxx",
       "sessionStart": 1699999000000,
       "visitCount": 1,
@@ -96,10 +95,15 @@ WFTK.init({
       "screen": "1920x1080",
       "viewport": "1920x1080",
       "language": "en-US"
+    },
+    "biz": {
+      "action": "cta_click"
     }
   }]
 }
 ```
+
+`data` holds system-collected context (page, session, device), while `biz` holds the user-supplied payload passed to `track(eventName, data)`. They are kept separate to avoid overlap.
 
 ## 🖥️ Server Implementation
 
