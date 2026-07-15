@@ -36,8 +36,8 @@ export function init(config: TrackerConfig): Tracer {
 /**
  * Track a custom event
  */
-export function track(eventName: string, data?: Record<string, any>): void {
-  trackerInstance?.track(eventName, data);
+export function track(event: string, data?: Record<string, any>): void {
+  trackerInstance?.track(event, data);
 }
 
 /**
